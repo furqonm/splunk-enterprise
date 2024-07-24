@@ -25,7 +25,7 @@ name=TreasureData
 baseurl=http://packages.treasuredata.com/4/amazon/2/\$basearch
 gpgcheck=1
 gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
-EOF
+    EOF
 
     # Install Fluentd and Splunk plugin
     yum install -y td-agent
@@ -74,7 +74,7 @@ EOF
         source apache
         sourcetype _json
       </match>
-      EOT
+    EOT
 
     # Start and enable Apache HTTPD, and restart fluentd agent
     systemctl start httpd
