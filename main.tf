@@ -1,7 +1,3 @@
-provider "aws" {
-  region = var.region
-}
-
 resource "aws_instance" "web" {
   ami           = var.ami  # Amazon Linux 2023 AMI
   instance_type = var.instance_type
@@ -12,8 +8,27 @@ resource "aws_instance" "web" {
     yum install -y httpd git
     systemctl start httpd
     systemctl enable httpd
-    curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
+
+    # Add Treasure Data GPG key
+    rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent
+
+    # Add Treasure Data repository to yum
+    cat >/etc/yum.repos.d/td.repo <<'EOT'
+    [treasuredata]
+    name=TreasureData
+    baseurl=http://packages.treasuredata.com/4/amazon/2/\$basearch
+    gpgcheck=1
+    gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
+    EOT
+
+    # Update your sources and install the toolbelt
+    yum check-update
+    yes | yum install -y td-agent
+
+    # Install the Fluentd Splunk plugin
     /usr/sbin/td-agent-gem install fluent-plugin-splunk-hec
+
+    # Configure td-agent
     cat <<EOT > /etc/td-agent/td-agent.conf
     <source>
       @type tail
@@ -54,7 +69,11 @@ resource "aws_instance" "web" {
       sourcetype _json
     </match>
     EOT
+
+    # Restart td-agent to apply the new configuration
     systemctl restart td-agent
+
+    # Deploy application
     cd /var/www/html
     git clone https://github.com/furqonm/packer-aws.git .
     EOF
