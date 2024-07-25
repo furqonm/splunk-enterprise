@@ -9,73 +9,11 @@ resource "aws_instance" "web" {
     systemctl start httpd
     systemctl enable httpd
 
-    # Add Treasure Data GPG key
-    rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent
-
-    # Add Treasure Data repository to yum
-    cat >/etc/yum.repos.d/td.repo <<'EOT'
-    [treasuredata]
-    name=TreasureData
-    baseurl=http://packages.treasuredata.com/4/amazon/2/\$basearch
-    gpgcheck=1
-    gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
-    EOT
-
-    # Update your sources and install the toolbelt
-    yum check-update
-    yes | yum install -y td-agent
-
-    # Install the Fluentd Splunk plugin
-    /usr/sbin/td-agent-gem install fluent-plugin-splunk-hec
-
-    # Configure td-agent
-    cat <<EOT > /etc/td-agent/td-agent.conf
-    <source>
-      @type tail
-      path /var/log/httpd/access_log
-      pos_file /var/log/td-agent/apache-access-log.pos
-      tag apache.access
-      <parse>
-        @type apache2
-      </parse>
-    </source>
-    <source>
-      @type tail
-      path /var/log/httpd/error_log
-      pos_file /var/log/td-agent/apache-error-log.pos
-      tag apache.error
-      <parse>
-        @type none
-      </parse>
-    </source>
-    <match apache.access>
-      @type splunk_hec
-      host ${var.splunk_hec_host}
-      port 8088
-      protocol https
-      token ${var.splunk_hec_token}
-      index ${var.splunk_index}
-      source apache
-      sourcetype _json
-    </match>
-    <match apache.error>
-      @type splunk_hec
-      host ${var.splunk_hec_host}
-      port 8088
-      protocol https
-      token ${var.splunk_hec_token}
-      index ${var.splunk_index}
-      source apache
-      sourcetype _json
-    </match>
-    EOT
-
-    # Restart td-agent to apply the new configuration
-    systemctl restart td-agent
-
-    # Deploy application
     cd /var/www/html
     git clone https://github.com/furqonm/packer-aws.git .
+
+    curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
+
     EOF
 
   tags = {
