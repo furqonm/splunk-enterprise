@@ -65,7 +65,7 @@ resource "aws_security_group" "splunk_sg" {
 # Define an EC2 instance with SSM role
 resource "aws_instance" "splunk_vm" {
   ami           = "ami-0ebfd941bbafe70c6"  # Amazon Linux 2023
-  instance_type = "c5a.xlarge"
+  instance_type = "c5a.2xlarge"
 
   # Attach the security group (no SSH access)
   vpc_security_group_ids = [aws_security_group.splunk_sg.id]
