@@ -62,7 +62,7 @@ resource "aws_security_group" "splunk_sg" {
   }
 }
 
-# Define an EC2 instance with SSM role
+# Define an EC2 instance with SSM role and 30GB EBS volume
 resource "aws_instance" "splunk_vm" {
   ami           = "ami-0ebfd941bbafe70c6"  # Amazon Linux 2023
   instance_type = "c5a.2xlarge"
@@ -73,8 +73,15 @@ resource "aws_instance" "splunk_vm" {
   # Attach IAM role for SSM access
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.id
 
-  # User data to install Splunk
-  user_data = <<-EOF
+  # Specify the root block device with a 30GB volume
+  root_block_device {
+    volume_size = 30  # 30 GB volume size
+    volume_type = "gp2"  # General Purpose SSD
+  }
+
+  # User data to install Splunk and configure index retention policy
+# User data to install Splunk and configure index retention policy
+user_data = <<-EOF
               #!/bin/bash
               sudo yum update -y
               sudo yum install -y wget
@@ -84,7 +91,16 @@ resource "aws_instance" "splunk_vm" {
               sudo rpm -i splunk-9.3.1-0b8d769cb912.x86_64.rpm
               sudo /opt/splunk/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd hambaAllah
               sudo /opt/splunk/bin/splunk enable boot-start
-              
+
+              # Configure _internal index to delete data after 7 days
+              sudo bash -c 'cat << EOF > /opt/splunk/etc/system/local/indexes.conf
+              [_internal]
+              frozenTimePeriodInSecs = 259200  # 3 days in seconds
+              EOF'
+
+              # Restart Splunk to apply index changes
+              sudo /opt/splunk/bin/splunk restart
+
               # Add a cron job to shut down the instance after 3 hours
               echo "sudo shutdown -h now" | at now + 3 hours
               EOF
