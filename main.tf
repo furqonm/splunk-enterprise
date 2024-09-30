@@ -36,7 +36,21 @@ resource "aws_security_group" "splunk_sg" {
     from_port   = 8000
     to_port     = 8000
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"] # Allow clients to the Splunk Search page.
+  }
+
+  ingress {
+    from_port   = 9997
+    to_port     = 9997
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allow forwarders to the Splunk indexer.
+  }
+
+  ingress {
+    from_port   = 8089
+    to_port     = 8089
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # For splunkd (also used by deployment server).
   }
 
   # Allow all outbound traffic
@@ -50,8 +64,8 @@ resource "aws_security_group" "splunk_sg" {
 
 # Define an EC2 instance with SSM role
 resource "aws_instance" "splunk_vm" {
-  ami           = "ami-0ebfd941bbafe70c6"  # Amazon Linux 2 AMI
-  instance_type = "c5a.large"
+  ami           = "ami-0ebfd941bbafe70c6"  # Amazon Linux 2023
+  instance_type = "c5a.xlarge"
 
   # Attach the security group (no SSH access)
   vpc_security_group_ids = [aws_security_group.splunk_sg.id]
