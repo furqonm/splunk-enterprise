@@ -68,7 +68,7 @@ resource "aws_instance" "splunk_vm" {
               # Install Splunk
               wget -O splunk-9.3.1-0b8d769cb912.x86_64.rpm "https://download.splunk.com/products/splunk/releases/9.3.1/linux/splunk-9.3.1-0b8d769cb912.x86_64.rpm"
               sudo rpm -i splunk-9.3.1-0b8d769cb912.x86_64.rpm
-              sudo /opt/splunk/bin/splunk start --accept-license --answer-yes --no-prompt
+              sudo /opt/splunk/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd hambaAllah
               sudo /opt/splunk/bin/splunk enable boot-start
               
               # Add a cron job to shut down the instance after 3 hours
