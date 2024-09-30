@@ -83,16 +83,32 @@ resource "aws_instance" "splunk_vm" {
   }
 
   # User data to install Splunk and configure cron job for shutdown
-  user_data = <<-EOF
+user_data = <<-EOF
               #!/bin/bash
               sudo yum update -y
               sudo yum install -y wget
 
-              # Download and install Splunk
+              # Download the Splunk installer
               wget -O splunk-9.3.1-0b8d769cb912.x86_64.rpm "https://download.splunk.com/products/splunk/releases/9.3.1/linux/splunk-9.3.1-0b8d769cb912.x86_64.rpm"
-              sudo rpm -i splunk-9.3.1-0b8d769cb912.x86_64.rpm
-              sudo /opt/splunk/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd hambaAllah
-              sudo /opt/splunk/bin/splunk enable boot-start
+
+              # Retry mechanism to wait for the RPM lock to be released
+              RETRY_COUNT=0
+              MAX_RETRIES=5
+              while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+                  sudo rpm -i splunk-9.3.1-0b8d769cb912.x86_64.rpm && break
+                  RETRY_COUNT=$((RETRY_COUNT+1))
+                  echo "Waiting for RPM lock to be released... Retry $RETRY_COUNT/$MAX_RETRIES"
+                  sleep 10
+              done
+
+              # If Splunk is successfully installed, configure and start it
+              if [ -x /opt/splunk/bin/splunk ]; then
+                  sudo /opt/splunk/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd hambaAllah
+                  sudo /opt/splunk/bin/splunk enable boot-start
+              else
+                  echo "Splunk installation failed."
+                  exit 1
+              fi
 
               # Add a cron job to shut down the instance after 3 hours
               echo "sudo shutdown -h now" | at now + 3 hours
