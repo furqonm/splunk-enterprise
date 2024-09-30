@@ -67,7 +67,7 @@ resource "aws_security_group" "splunk_sg" {
 
 # Define an EC2 instance with SSM role and 30GB EBS volume
 resource "aws_instance" "splunk_vm" {
-  ami           = "ami-0ebfd941bbafe70c6"  # Amazon Linux 2023 AMI
+  ami           = "ami-0e54eba7c51c234f6"  # Amazon Linux 2023 AMI
   instance_type = "c5a.2xlarge"  # Instance type to meet Splunk's resource needs
 
   # Attach the security group
