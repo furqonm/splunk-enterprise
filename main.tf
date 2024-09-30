@@ -110,7 +110,12 @@ user_data = <<-EOF
                   exit 1
               fi
 
-              # Add a cron job to shut down the instance after 3 hours
+              # Ensure that a shutdown is scheduled 3 hours after boot using cron
+              if ! sudo crontab -l | grep -q '@reboot echo'; then
+                (sudo crontab -l 2>/dev/null; echo "@reboot echo 'sudo shutdown -h now' | at now + 3 hours") | sudo crontab -
+              fi
+
+              # Add the shutdown job immediately on this first boot
               echo "sudo shutdown -h now" | at now + 3 hours
               EOF
 
