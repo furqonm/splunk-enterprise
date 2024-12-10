@@ -86,7 +86,7 @@ resource "aws_instance" "splunk_vm" {
 user_data = <<-EOF
               #!/bin/bash
               sudo yum update -y
-              sudo yum install -y wget
+              sudo yum install -y wget net-tools
 
               # Download the Splunk installer
               wget -O splunk-9.3.1-0b8d769cb912.x86_64.rpm "https://download.splunk.com/products/splunk/releases/9.3.1/linux/splunk-9.3.1-0b8d769cb912.x86_64.rpm"
@@ -109,14 +109,56 @@ user_data = <<-EOF
                   echo "Splunk installation failed."
                   exit 1
               fi
+              
+              # Ensure 'atd' is enabled and running
+              systemctl enable atd
+              systemctl start atd
 
-              # Ensure that a shutdown is scheduled 3 hours after boot using cron
-              if ! sudo crontab -l | grep -q '@reboot echo'; then
-                (sudo crontab -l 2>/dev/null; echo "@reboot echo 'sudo shutdown -h now' | at now + 3 hours") | sudo crontab -
+              # Create the monitoring script
+              cat << 'EOF' > /usr/local/bin/monitor_splunk_idle.sh
+              #!/bin/bash
+
+              PORT=8000
+              IDLE_THRESHOLD=3600
+              LOG_FILE="/var/log/splunk_idle_monitor.log"
+              SPLUNK_CMD="/opt/splunk/bin/splunk"
+
+              is_port_active() {
+                netstat -an | grep ":$PORT " | grep ESTABLISHED > /dev/null
+                return $?
+              }
+
+              if [ ! -f "/tmp/last_active_time" ]; then
+                date +%s > /tmp/last_active_time
               fi
 
-              # Add the shutdown job immediately on this first boot
-              echo "sudo shutdown -h now" | at now + 3 hours
+              last_active_time=$(cat /tmp/last_active_time)
+
+              if is_port_active; then
+                echo "$(date) - Port $PORT is active." >> "$LOG_FILE"
+                date +%s > /tmp/last_active_time
+              else
+                echo "$(date) - Port $PORT is idle." >> "$LOG_FILE"
+              fi
+
+              current_time=$(date +%s)
+              idle_time=$((current_time - last_active_time))
+
+              if [ $idle_time -ge $IDLE_THRESHOLD ]; then
+                echo "$(date) - Port $PORT has been idle for $IDLE_THRESHOLD seconds. Shutting down Splunk server..." >> "$LOG_FILE"
+                $SPLUNK_CMD stop >> "$LOG_FILE" 2>&1
+              fi
+              EOF
+
+              # Make the script executable
+              chmod +x /usr/local/bin/monitor_splunk_idle.sh
+
+              # Schedule the cron job
+              (crontab -l 2>/dev/null; echo "*/5 * * * * /usr/local/bin/monitor_splunk_idle.sh") | crontab -
+
+              # Restart cron to apply changes
+              systemctl restart crond
+
               EOF
 
   # Tags to identify the instance
