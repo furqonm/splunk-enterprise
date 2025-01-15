@@ -1,0 +1,31 @@
+event,user_id,name,date_of_birth,city,position,event_date
+registration,user1,Max Reinhard,11/19/1992,Los Angeles,Cloud Engineer,11/7/2022 10:40
+registration,user2,Bossman,8/13/2015,Tanggerang Selatan,IT Engineer,6/9/2024 21:32
+registration,user3,Mr. T,11/14/2017,Bekasi,Sales Manager,4/7/2023 22:05
+registration,user4,Falcon Abdullah,2/10/2019,Jakarta Pusat,Assistant,2/1/2024 13:13
+registration,user5,Ai Fuyuumi,2/4/2013,Hokkaido,Marketing Manager,3/29/2022 8:14
+registration,user6,Young Master Xu,4/7/1991,Guangzhou,HR Manager,4/3/2022 5:09
+registration,user7,Furqon Mauladani,5/2/1995,Jakarta Selatan,IT Trainer,9/10/2024 6:30
+registration,user8,Marika Tachibana,7/18/2000,Tokyo,Data Analyst,5/27/2024 19:37
+registration,user9,Hans,5/31/1992,Houston,HR Staff,12/29/2023 17:38
+registration,user10,Ye Mo,6/4/2014,Beijing,Director,4/17/2022 20:26
+registration,user11,Ning Qingxue,4/3/2000,Shanghai,HR Staff,10/15/2022 5:35
+registration,user12,Alisa Mikhailovna Kujou,1/23/1992,Kyoto,Marketing Staff,9/13/2022 22:06
+registration,user13,Ichijou,1/17/2017,Kyoto,Marketing Staff,6/29/2022 22:28
+registration,user14,Asep Kurniawan,2/15/1995,Depok,IT Engineer,6/22/2022 15:17
+registration,user15,Mr. X,10/29/2004,Surabaya,Sales Staff,7/22/2024 3:31
+registration,user16,NPC,9/22/1989,Sumenep,Security Staff,7/15/2022 12:10
+registration,user17,Elna von Amsberg,2/3/2010,Amsberg,Supervisor Security,8/21/2023 10:29
+registration,user18,Logan Mclain,5/31/2000,Phoenix,Komisaris,8/14/2023 5:55
+registration,user19,Finne von Kleinert,5/29/2009,Kleinert,Secretary,1/13/2022 17:58
+registration,user20,Stephane Mareek,3/1/1991,Los Angeles,Data Engineer,1/19/2023 19:02
+deletion,user1,Max Reinhard,11/19/1992,Los Angeles,Cloud Engineer,4/23/2024 19:02
+deletion,user3,Mr. T,11/14/2017,Bekasi,Sales Manager,5/3/2024 17:58
+deletion,user12,Alisa Mikhailovna Kujou,1/23/1992,Kyoto,Marketing Staff,7/9/2024 15:17
+deletion,user9,Hans,5/31/1992,Houston,HR Staff,6/7/2024 15:17
+deletion,user17,Elna von Amsberg,2/3/2010,Amsberg,Supervisor Security,6/8/2024 19:27
+deletion,user13,Ichijou,1/17/2017,Kyoto,Marketing Staff,6/7/2023 19:27
+deletion,user14,Asep Kurniawan,2/15/1995,Depok,IT Engineer,12/20/2023 5:55
+deletion,user8,Marika Tachibana,7/18/2000,Tokyo,Data Analyst,9/20/2024 5:00
+deletion,user4,Falcon Abdullah,2/10/2019,Jakarta Pusat,Assistant,9/20/2024 5:30
+deletion,user19,Finne von Kleinert,5/29/2009,Kleinert,Secretary,6/17/2024 22:06
